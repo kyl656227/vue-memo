@@ -1,23 +1,37 @@
 <script setup>
-import { reactive, onMounted } from 'vue';
-import { StorageService, StorageService } from '@/services/StorageService';
-
-//스토리지서비스 클래스 내에 있는 생성자 호출
-//생성자 호출할때는 new 키워드가 앞에 꼭 있어야함
-const storageService = new StorageService('myMemo'); 
-
-const state = reactive ({
-  memos: {}
-});
-
-onMounted(()=> state.memos = storageService.getItems() );
-
-</script>
-
-<template>
-  <div class = "memo-list">
-    <router-link class="item" v-for = "item in state.memos" :to="`/memos/${item.id}`">
-
-    </router-link>
-  </div>
-</template>
+  import { reactive, onMounted } from 'vue';
+  import storageService from '@/services/StorageService';
+  
+  const state = reactive({
+    memos: {}
+  });
+  
+  onMounted( () => state.memos = storageService.getItems() );
+  const remove = id => {
+    if(!confirm('삭제하시겠습니까?')) { 
+      return;
+    }
+    storageService.delItem(id);
+    state.memos = storageService.getItems();
+  }
+  </script>
+  
+  <template>
+    <div class="memo-list">
+      <router-link class="item" v-for="item in state.memos" :to="`/memos/${item.id}`" :key="item.id">
+        <div class="d-flex pt-3">
+          <div class="pb-3 mb-0 w-100">
+            <div class="d-flex justify-content-between">
+              <b>{{ item.title }}</b>
+              <div>
+                <span role="button" @click.prevent="remove(item.id)">삭제</span> <!--버블링을 금지 시키기 위해서 prevent씀-->
+              </div>
+            </div>
+            <div class="mt-2">{{ item.content }}</div>
+          </div>
+        </div>
+      </router-link>
+      <router-link to="/memos/add" class="add btn btn-primary">+ 추가하기</router-link>
+  
+    </div>
+  </template>
